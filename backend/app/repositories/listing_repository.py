@@ -20,6 +20,30 @@ class ListingRepository:
         if filters.property_type:
             clauses.append("l.property_type = ?")
             values.append(filters.property_type)
+        for amenity in filters.amenities:
+            clauses.append("LOWER(l.amenities) LIKE ?")
+            values.append(f"%{amenity.lower()}%")
+        if filters.min_bedrooms:
+            clauses.append("l.bedrooms >= ?")
+            values.append(filters.min_bedrooms)
+        if filters.min_beds:
+            clauses.append("l.beds >= ?")
+            values.append(filters.min_beds)
+        if filters.min_baths:
+            clauses.append("l.baths >= ?")
+            values.append(filters.min_baths)
+        if filters.min_rating:
+            clauses.append("l.rating >= ?")
+            values.append(filters.min_rating)
+        if filters.check_in and filters.check_out:
+            clauses.append(
+                """NOT EXISTS (
+                    SELECT 1 FROM bookings b
+                    WHERE b.listing_id = l.id AND b.status = 'confirmed'
+                    AND b.check_in < ? AND b.check_out > ?
+                )"""
+            )
+            values.extend([filters.check_out.isoformat(), filters.check_in.isoformat()])
         return " AND ".join(clauses), values
 
     def search(self, database: sqlite3.Connection, filters: ListingFilters, user_id: int) -> tuple[list[dict], int]:

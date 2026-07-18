@@ -7,6 +7,12 @@ from backend.app.schemas.listing import ListingFilters
 
 class ListingService:
     def search(self, filters: ListingFilters, user_id: int) -> dict:
+        if filters.min_price > filters.max_price:
+            raise HTTPException(status_code=422, detail="Minimum price cannot exceed maximum price")
+        if bool(filters.check_in) != bool(filters.check_out):
+            raise HTTPException(status_code=422, detail="Both check-in and checkout dates are required")
+        if filters.check_in and filters.check_out and filters.check_out <= filters.check_in:
+            raise HTTPException(status_code=422, detail="Checkout must be at least one night after check-in")
         with connection() as database:
             items, total = listing_repository.search(database, filters, user_id)
         pages = max(1, (total + filters.page_size - 1) // filters.page_size)

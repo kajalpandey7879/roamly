@@ -8,6 +8,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 export default function ListingCard({ listing }: { listing: Listing }) {
   const [fav, setFav] = useState(listing.is_favorite);
+  const [imageLoaded, setImageLoaded] = useState(false);
   async function toggle(e: React.MouseEvent) {
     e.preventDefault();
     try {
@@ -19,13 +20,19 @@ export default function ListingCard({ listing }: { listing: Listing }) {
     }
   }
   return (
-    <Link className="listing-card" href={'/listings/' + listing.id}>
-      <div className="card-photo">
+    <Link
+      className="listing-card"
+      href={'/listings/' + listing.id}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <div className={`card-photo${imageLoaded ? ' image-loaded' : ''}`}>
         <Image
           src={listing.images[0]}
           alt={listing.title}
           fill
           sizes="(max-width: 760px) 100vw, 25vw"
+          onLoad={() => setImageLoaded(true)}
         />
         <button
           onClick={toggle}

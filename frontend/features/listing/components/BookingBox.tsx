@@ -1,49 +1,46 @@
 'use client';
-import { Listing } from '@/shared/types/domain';
-import { bookingsApi } from '@/features/bookings/api';
-import { differenceInCalendarDays, format } from 'date-fns';
-import { useSearchParams, useRouter } from 'next/navigation';
+
+import type { Listing } from '@/shared/types/domain';
+import { addDays, differenceInCalendarDays, format } from 'date-fns';
+import { Minus, Plus, Star } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Minus, Plus, Star } from 'lucide-react';
+
 export default function BookingBox({ listing }: { listing: Listing }) {
-  const q = useSearchParams(),
-    router = useRouter();
-  const [checkIn, setCheckIn] = useState(q.get('checkin') || ''),
-    [checkOut, setCheckOut] = useState(q.get('checkout') || ''),
-    [guests, setGuests] = useState(Number(q.get('guests') || 1)),
-    [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [checkIn, setCheckIn] = useState(searchParams.get('check_in') || '');
+  const [checkOut, setCheckOut] = useState(searchParams.get('check_out') || '');
+  const [guests, setGuests] = useState(Number(searchParams.get('guests') || 1));
   const nights = useMemo(
     () =>
       checkIn && checkOut
         ? Math.max(
             0,
-            differenceInCalendarDays(new Date(checkOut + 'T12:00'), new Date(checkIn + 'T12:00')),
+            differenceInCalendarDays(new Date(`${checkOut}T12:00`), new Date(`${checkIn}T12:00`)),
           )
         : 0,
     [checkIn, checkOut],
   );
-  const subtotal = listing.price * nights,
-    total = subtotal + listing.cleaning_fee + listing.service_fee;
-  async function reserve() {
-    if (!checkIn || !checkOut || !nights)
-      return toast.error('Choose valid check-in and check-out dates');
-    setLoading(true);
-    try {
-      const b = await bookingsApi.create({
-        listing_id: listing.id,
-        check_in: checkIn,
-        check_out: checkOut,
-        guests,
-      });
-      toast.success('Your stay is confirmed');
-      router.push('/confirmation?booking=' + b.id + '&listing=' + listing.id + '&total=' + b.total);
-    } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setLoading(false);
-    }
+  const minimumCheckout = checkIn
+    ? format(addDays(new Date(`${checkIn}T12:00`), 1), 'yyyy-MM-dd')
+    : format(addDays(new Date(), 1), 'yyyy-MM-dd');
+  const subtotal = listing.price * nights;
+  const total = subtotal + listing.cleaning_fee + listing.service_fee;
+
+  function reserve() {
+    if (!checkIn || !checkOut || nights < 1)
+      return toast.error('Choose a stay of at least one night');
+    const params = new URLSearchParams({
+      listing: String(listing.id),
+      check_in: checkIn,
+      check_out: checkOut,
+      guests: String(guests),
+    });
+    router.push(`/checkout?${params}`);
   }
+
   return (
     <aside className="booking-box">
       <div className="booking-price">
@@ -51,7 +48,7 @@ export default function BookingBox({ listing }: { listing: Listing }) {
           <strong>${listing.price}</strong> night
         </span>
         <span>
-          <Star size={14} fill="currentColor" /> {listing.rating} ·{' '}
+          <Star size={14} fill="currentColor" /> {listing.rating} &middot;{' '}
           <u>{listing.review_count} reviews</u>
         </span>
       </div>
@@ -62,16 +59,20 @@ export default function BookingBox({ listing }: { listing: Listing }) {
             type="date"
             min={format(new Date(), 'yyyy-MM-dd')}
             value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
+            onChange={(event) => {
+              const value = event.target.value;
+              setCheckIn(value);
+              if (checkOut && value >= checkOut) setCheckOut('');
+            }}
           />
         </label>
         <label>
           CHECKOUT
           <input
             type="date"
-            min={checkIn || format(new Date(), 'yyyy-MM-dd')}
+            min={minimumCheckout}
             value={checkOut}
-            onChange={(e) => setCheckOut(e.target.value)}
+            onChange={(event) => setCheckOut(event.target.value)}
           />
         </label>
         <div className="guest-select">
@@ -94,15 +95,15 @@ export default function BookingBox({ listing }: { listing: Listing }) {
           </div>
         </div>
       </div>
-      <button className="primary" onClick={reserve} disabled={loading}>
-        {loading ? 'Confirming…' : 'Reserve'}
+      <button className="primary" onClick={reserve}>
+        Reserve
       </button>
-      <p className="no-charge">You won’t be charged yet</p>
+      <p className="no-charge">You won&apos;t be charged yet</p>
       {nights > 0 && (
         <div className="breakdown">
           <p>
             <u>
-              ${listing.price} × {nights} nights
+              ${listing.price} x {nights} nights
             </u>
             <span>${subtotal}</span>
           </p>

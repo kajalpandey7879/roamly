@@ -63,3 +63,30 @@ def test_host_listing_crud():
 
         deleted = client.delete(f"/host/listings/{listing_id}")
         assert deleted.status_code == 204
+
+
+def test_search_filters_unavailable_dates_and_amenities():
+    with client:
+        unavailable = client.get("/listings?check_in=2026-08-11&check_out=2026-08-13")
+        assert unavailable.status_code == 200
+        assert all(item["id"] != 1 for item in unavailable.json()["items"])
+
+        amenity = client.get("/listings?amenities=Private sauna&min_rating=4.9")
+        assert amenity.status_code == 200
+        assert [item["city"] for item in amenity.json()["items"]] == ["Rovaniemi"]
+
+
+def test_search_rejects_same_day_stay():
+    with client:
+        response = client.get("/listings?check_in=2026-09-01&check_out=2026-09-01")
+        assert response.status_code == 422
+
+
+def test_discovery_collections_have_scrollable_inventory():
+    with client:
+        goa = client.get("/listings?location=North Goa&page_size=12")
+        puducherry = client.get("/listings?location=Puducherry&page_size=12")
+        assert goa.status_code == 200
+        assert puducherry.status_code == 200
+        assert goa.json()["total"] >= 8
+        assert puducherry.json()["total"] >= 8

@@ -1,22 +1,51 @@
 'use client';
 import Link from 'next/link';
-import { Globe2, Menu, UserRound } from 'lucide-react';
+import { Globe2, House, Menu, Search, UserRound } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import Logo from './Logo';
 import { useState } from 'react';
 export default function Header() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const isCollectionPage = pathname.startsWith('/collections/');
+  const isListingPage = pathname.startsWith('/listings/');
+  const isCheckoutPage = pathname === '/checkout';
+  const hasCompactSearch = isCollectionPage || isListingPage;
+  if (isCheckoutPage)
+    return (
+      <header className="header checkout-site-header">
+        <div className="header-inner">
+          <Logo />
+        </div>
+      </header>
+    );
   return (
-    <header className="header">
+    <header
+      className={`header${hasCompactSearch ? ' collection-site-header' : ''}${isListingPage ? ' listing-site-header' : ''}`}
+    >
       <div className="header-inner">
         <Logo />
-        <nav className="desktop-nav">
-          <Link href="/">Stays</Link>
-          <Link href="/wishlists">Wishlists</Link>
-          <Link href="/trips">Trips</Link>
-        </nav>
+        {hasCompactSearch ? (
+          <Link className="collection-compact-search" href="/">
+            <span>
+              <House size={17} /> {isCollectionPage ? 'Homes in map area' : 'Anywhere'}
+            </span>
+            <span>{isCollectionPage ? 'Any weekend' : 'Anytime'}</span>
+            <span>Add guests</span>
+            <b>
+              <Search size={16} />
+            </b>
+          </Link>
+        ) : (
+          <nav className="desktop-nav">
+            <Link href="/">Stays</Link>
+            <Link href="/wishlists">Wishlists</Link>
+            <Link href="/trips">Trips</Link>
+          </nav>
+        )}
         <div className="account">
           <Link className="host-link" href="/host">
-            Roamly your home
+            {hasCompactSearch ? 'Become a host' : 'Roamly your home'}
           </Link>
           <button className="icon-button" title="Choose language">
             <Globe2 size={18} />

@@ -39,6 +39,8 @@ export interface Listing {
   review_count: number;
   amenities: string[];
   images: string[];
+  latitude: number;
+  longitude: number;
   is_favorite: boolean;
   host?: Host;
   reviews?: Review[];

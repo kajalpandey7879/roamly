@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import date
 
 from pydantic import BaseModel, Field
 
@@ -8,9 +9,16 @@ class ListingFilters:
     location: str = ""
     category: str = ""
     property_type: str = ""
+    amenities: tuple[str, ...] = ()
     min_price: float = 0
     max_price: float = 10_000
+    min_bedrooms: int = 0
+    min_beds: int = 0
+    min_baths: float = 0
+    min_rating: float = 0
     guests: int = 1
+    check_in: date | None = None
+    check_out: date | None = None
     page: int = 1
     page_size: int = 8
 
