@@ -4,8 +4,24 @@ from backend.app.db.serializers import serialize_listing, serialize_listing_payl
 
 
 class HostRepository:
+    def promote_to_host(self, database: sqlite3.Connection, user_id: int) -> bool:
+        return bool(
+            database.execute(
+                "UPDATE users SET role='host' WHERE id=?",
+                (user_id,),
+            ).rowcount
+        )
+
     def listings(self, database: sqlite3.Connection, host_id: int) -> list[dict]:
-        rows = database.execute("SELECT l.*, (SELECT COUNT(*) FROM bookings b WHERE b.listing_id=l.id) booking_count FROM listings l WHERE host_id=? ORDER BY created_at DESC", (host_id,)).fetchall()
+        rows = database.execute(
+            """SELECT l.*, COUNT(b.id) booking_count
+            FROM listings l
+            LEFT JOIN bookings b ON b.listing_id=l.id
+            WHERE l.host_id=? AND l.is_active=1
+            GROUP BY l.id
+            ORDER BY l.created_at DESC""",
+            (host_id,),
+        ).fetchall()
         return [serialize_listing(row) for row in rows]
 
     def bookings(self, database: sqlite3.Connection, host_id: int) -> list[dict]:
@@ -20,11 +36,19 @@ class HostRepository:
 
     def update(self, database: sqlite3.Connection, listing_id: int, host_id: int, payload: dict) -> bool:
         values = serialize_listing_payload(payload)
-        cursor = database.execute(f"UPDATE listings SET {','.join(f'{key}=?' for key in values)} WHERE id=? AND host_id=?", [*values.values(), listing_id, host_id])
+        cursor = database.execute(
+            f"UPDATE listings SET {','.join(f'{key}=?' for key in values)} WHERE id=? AND host_id=? AND is_active=1",
+            [*values.values(), listing_id, host_id],
+        )
         return bool(cursor.rowcount)
 
     def delete(self, database: sqlite3.Connection, listing_id: int, host_id: int) -> bool:
-        return bool(database.execute("DELETE FROM listings WHERE id=? AND host_id=?", (listing_id, host_id)).rowcount)
+        return bool(
+            database.execute(
+                "UPDATE listings SET is_active=0 WHERE id=? AND host_id=? AND is_active=1",
+                (listing_id, host_id),
+            ).rowcount
+        )
 
 
 host_repository = HostRepository()

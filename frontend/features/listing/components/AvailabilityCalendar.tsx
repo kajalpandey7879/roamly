@@ -42,7 +42,11 @@ export default function AvailabilityCalendar({
     <section className="detail-calendar-section">
       <header>
         <div>
-          <h2>{nights ? `${nights} night${nights === 1 ? '' : 's'} in ${city}` : `Select dates in ${city}`}</h2>
+          <h2>
+            {nights
+              ? `${nights} night${nights === 1 ? '' : 's'} in ${city}`
+              : `Select dates in ${city}`}
+          </h2>
           <p>
             {selectedRange?.from && selectedRange.to
               ? `${format(selectedRange.from, 'MMM d, yyyy')} - ${format(selectedRange.to, 'MMM d, yyyy')}`
@@ -62,9 +66,7 @@ export default function AvailabilityCalendar({
       />
       <footer>
         <Keyboard size={19} />
-        {selectedRange?.from && (
-          <button onClick={() => selectRange(undefined)}>Clear dates</button>
-        )}
+        {selectedRange?.from && <button onClick={() => selectRange(undefined)}>Clear dates</button>}
       </footer>
     </section>
   );

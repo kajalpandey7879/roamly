@@ -32,6 +32,7 @@ function Explore() {
     [meta, setMeta] = useState({ page: 1, pages: 1, total: 0 }),
     [collectionItems, setCollectionItems] = useState<Record<string, Listing[]>>({}),
     [loading, setLoading] = useState(true),
+    [error, setError] = useState(false),
     [filters, setFilters] = useState(false);
   const category = q.get('category') || '';
   const isSearchView = [
@@ -61,6 +62,7 @@ function Explore() {
   ].filter((key) => q.has(key)).length;
   useEffect(() => {
     setLoading(true);
+    setError(false);
     if (isSearchView) {
       listingsApi
         .search(q.toString())
@@ -68,6 +70,7 @@ function Explore() {
           setItems(result.items);
           setMeta(result);
         })
+        .catch(() => setError(true))
         .finally(() => setLoading(false));
       return;
     }
@@ -78,6 +81,7 @@ function Explore() {
       ),
     )
       .then((entries) => setCollectionItems(Object.fromEntries(entries)))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [q, isSearchView]);
   function setParam(key: string, value: string) {
@@ -128,29 +132,39 @@ function Explore() {
               <h2>Homes for your trip</h2>
             </div>
           </div>
-          {loading ? <LoadingGrid /> : <ListingGrid items={items} />}
-          <div className="pagination">
-            <button
-              disabled={meta.page <= 1}
-              onClick={() => setParam('page', String(meta.page - 1))}
-            >
-              Previous
-            </button>
-            <span>
-              Page {meta.page} of {meta.pages}
-            </span>
-            <button
-              disabled={meta.page >= meta.pages}
-              onClick={() => setParam('page', String(meta.page + 1))}
-            >
-              Next
-            </button>
-          </div>
+          {loading ? <LoadingGrid /> : error ? <DataLoadError /> : <ListingGrid items={items} />}
+          {!loading && !error && meta.total > 0 && (
+            <div className="pagination">
+              <button
+                disabled={meta.page <= 1}
+                onClick={() => setParam('page', String(meta.page - 1))}
+              >
+                Previous
+              </button>
+              <span>
+                Page {meta.page} of {meta.pages}
+              </span>
+              <button
+                disabled={meta.page >= meta.pages}
+                onClick={() => setParam('page', String(meta.page + 1))}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </main>
       ) : (
         <main className="home-collections">
           {loading ? (
             <LoadingCarousels />
+          ) : error ? (
+            <DataLoadError />
+          ) : Object.values(collectionItems).every((listings) => listings.length === 0) ? (
+            <div className="empty inventory-empty">
+              <House size={36} />
+              <h2>No homes are available yet</h2>
+              <p>New listings will appear here as soon as hosts publish them.</p>
+            </div>
           ) : (
             HOME_COLLECTIONS.map((collection) => (
               <ListingCarousel
@@ -164,6 +178,16 @@ function Explore() {
         </main>
       )}
     </>
+  );
+}
+
+function DataLoadError() {
+  return (
+    <div className="empty inventory-empty" role="alert">
+      <House size={36} />
+      <h2>We couldn&apos;t load these homes</h2>
+      <p>Check that the API is running, then refresh the page.</p>
+    </div>
   );
 }
 

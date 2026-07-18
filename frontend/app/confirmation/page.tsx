@@ -18,8 +18,8 @@ function Confirmation() {
       <div className="confirmation-ref">
         <CalendarDays />
         <div>
-          <small>CONFIRMATION</small>
-          <b>RML-{String(q.get('booking') || '').padStart(6, '0')}</b>
+          <small>BOOKING UUID</small>
+          <b>{q.get('booking_uuid') || 'Unavailable'}</b>
         </div>
         <div>
           <small>TOTAL</small>

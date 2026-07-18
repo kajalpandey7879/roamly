@@ -21,15 +21,10 @@ interface ListingMapProps {
   onResize: () => void;
   onInteractionStart: () => void;
   onInteractionEnd: () => void;
+  onBoundsChange: (bounds: { north: number; south: number; east: number; west: number }) => void;
 }
 
-function MapInteractionObserver({
-  onStart,
-  onEnd,
-}: {
-  onStart: () => void;
-  onEnd: () => void;
-}) {
+function MapInteractionObserver({ onStart, onEnd }: { onStart: () => void; onEnd: () => void }) {
   useMapEvents({
     movestart: onStart,
     zoomstart: onStart,
@@ -57,6 +52,31 @@ function MapResizeObserver({ onResize }: { onResize: () => void }) {
     observer.observe(container);
     return () => observer.disconnect();
   }, [map, onResize]);
+
+  return null;
+}
+
+function MapBoundsReporter({
+  onChange,
+}: {
+  onChange: (bounds: { north: number; south: number; east: number; west: number }) => void;
+}) {
+  const map = useMapEvents({
+    dragend: report,
+    zoomend: (event) => {
+      if ((event as L.LeafletEvent & { originalEvent?: Event }).originalEvent) report();
+    },
+  });
+
+  function report() {
+    const bounds = map.getBounds();
+    onChange({
+      north: bounds.getNorth(),
+      south: bounds.getSouth(),
+      east: bounds.getEast(),
+      west: bounds.getWest(),
+    });
+  }
 
   return null;
 }
@@ -113,6 +133,7 @@ function MapMarker({
           {/* The URL is controlled by seeded or host-entered listing data. */}
           <img src={listing.images[0]} alt="" />
           <div>
+            {listing.host_is_superhost ? <em>Superhost</em> : null}
             <strong>{listing.title}</strong>
             <span>
               {listing.city}, {listing.country}
@@ -132,6 +153,7 @@ export default function ListingMap({
   onResize,
   onInteractionStart,
   onInteractionEnd,
+  onBoundsChange,
 }: ListingMapProps) {
   const mappedListings = listings.filter(
     (listing) => Number.isFinite(listing.latitude) && Number.isFinite(listing.longitude),
@@ -155,6 +177,7 @@ export default function ListingMap({
       <ZoomControl position="topright" />
       <MapResizeObserver onResize={onResize} />
       <MapInteractionObserver onStart={onInteractionStart} onEnd={onInteractionEnd} />
+      <MapBoundsReporter onChange={onBoundsChange} />
       <MapBounds listings={mappedListings} />
       {mappedListings.map((listing) => (
         <MapMarker

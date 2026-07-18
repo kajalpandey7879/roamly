@@ -1,6 +1,9 @@
 import json
+from datetime import date, timedelta
+from uuid import uuid4
 
 from backend.app.db.connection import transaction
+from backend.app.db.migrations import apply_compatibility_migrations
 from backend.app.db.schema import SCHEMA
 
 BASE = "https://images.unsplash.com/photo-"
@@ -54,6 +57,68 @@ DISCOVERY_COORDINATES = [
     (11.963, 79.842),
 ]
 
+REVIEW_TEMPLATES = [
+    (
+        "Priya",
+        "https://i.pravatar.cc/120?img=32",
+        5.0,
+        "Beautifully prepared, peaceful, and exactly as described. Check-in was effortless and the host was thoughtful throughout our stay.",
+        "2026-06-12",
+    ),
+    (
+        "Daniel",
+        "https://i.pravatar.cc/120?img=12",
+        4.8,
+        "A comfortable home in a great location. The photos were accurate, the kitchen was well equipped, and communication was quick.",
+        "2026-05-08",
+    ),
+    (
+        "Meera",
+        "https://i.pravatar.cc/120?img=47",
+        5.0,
+        "We would happily return. The space was spotless, quiet at night, and close to everything we wanted to explore.",
+        "2026-04-19",
+    ),
+]
+
+DEMO_COMPLETED_BOOKING_UUID = "6bb9a02c-732b-4c7d-9ee8-55a87ecbf514"
+
+
+def _seed_completed_trip(database) -> None:
+    if database.execute(
+        "SELECT 1 FROM bookings WHERE booking_uuid=?", (DEMO_COMPLETED_BOOKING_UUID,)
+    ).fetchone():
+        return
+    listing = database.execute(
+        "SELECT id,price,cleaning_fee,service_fee FROM listings WHERE id=2"
+    ).fetchone()
+    if not listing:
+        return
+    check_out = date.today() - timedelta(days=21)
+    check_in = check_out - timedelta(days=3)
+    total = round(listing["price"] * 3 + listing["cleaning_fee"] + listing["service_fee"], 2)
+    database.execute(
+        """INSERT INTO bookings(
+            booking_uuid,listing_id,guest_id,check_in,check_out,guests,nights,
+            price_per_night,cleaning_fee_snapshot,service_fee_snapshot,
+            total_price,total,status
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?, 'confirmed')""",
+        (
+            DEMO_COMPLETED_BOOKING_UUID,
+            listing["id"],
+            1,
+            check_in.isoformat(),
+            check_out.isoformat(),
+            2,
+            3,
+            listing["price"],
+            listing["cleaning_fee"],
+            listing["service_fee"],
+            total,
+            total,
+        ),
+    )
+
 
 def _seed_discovery_homes(database) -> None:
     for index, home in enumerate(DISCOVERY_HOMES):
@@ -97,19 +162,66 @@ def _seed_discovery_homes(database) -> None:
         )
 
 
+def _seed_reviews(database) -> None:
+    listing_ids = [row[0] for row in database.execute("SELECT id FROM listings").fetchall()]
+    for listing_id in listing_ids:
+        existing = database.execute(
+            "SELECT COUNT(*) FROM reviews WHERE listing_id=?", (listing_id,)
+        ).fetchone()[0]
+        for template in REVIEW_TEMPLATES[existing:]:
+            database.execute(
+                """INSERT INTO reviews(
+                    listing_id,user_name,avatar,rating,body,created_at
+                ) VALUES (?,?,?,?,?,?)""",
+                (listing_id, *template),
+            )
+    database.execute(
+        """UPDATE listings
+        SET rating = COALESCE(
+                (SELECT ROUND(AVG(r.rating), 2) FROM reviews r WHERE r.listing_id=listings.id),
+                rating
+            ),
+            review_count = (
+                SELECT COUNT(*) FROM reviews r WHERE r.listing_id=listings.id
+            )
+        """
+    )
+
+
 def initialize_database() -> None:
     with transaction() as database:
         database.executescript(SCHEMA)
+        apply_compatibility_migrations(database)
         if database.execute("SELECT COUNT(*) FROM users").fetchone()[0]:
             _seed_discovery_homes(database)
+            _seed_reviews(database)
+            _seed_completed_trip(database)
             return
-        database.executemany("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?)", [(1, "Alex Morgan", "https://i.pravatar.cc/160?img=12", "guest", 2021, 0), (2, "Maya Chen", "https://i.pravatar.cc/160?img=47", "host", 2018, 1), (3, "Jon Bell", "https://i.pravatar.cc/160?img=11", "host", 2019, 1)])
+        database.executemany(
+            """INSERT INTO users(
+                id,name,avatar,role,joined_year,is_superhost,email,email_verified,auth_provider
+            ) VALUES (?,?,?,?,?,?,?,?,?)""",
+            [
+                (1, "Alex Morgan", "https://i.pravatar.cc/160?img=12", "guest", 2021, 0, "alex@roamly.demo", 1, "demo"),
+                (2, "Maya Chen", "https://i.pravatar.cc/160?img=47", "host", 2018, 1, "maya@roamly.demo", 1, "demo"),
+                (3, "Jon Bell", "https://i.pravatar.cc/160?img=11", "host", 2019, 1, "jon@roamly.demo", 1, "demo"),
+            ],
+        )
         rows = []
         for index, listing in enumerate(LISTINGS):
             gallery = [IMAGES[(index + offset) % len(IMAGES)] for offset in range(5)]
             rows.append(listing[:16] + (json.dumps(listing[16]), json.dumps(gallery)) + listing[17:])
         database.executemany("""INSERT INTO listings(host_id,title,description,city,country,property_type,category,price,cleaning_fee,service_fee,max_guests,bedrooms,beds,baths,rating,review_count,amenities,images,latitude,longitude) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", rows)
         database.executemany("INSERT INTO reviews(listing_id,user_name,avatar,rating,body,created_at) VALUES (?,?,?,?,?,?)", [(1, "Priya", "https://i.pravatar.cc/80?img=32", 5, "The view is even better than the photos. Thoughtful design and a wonderfully responsive host.", "2026-05-12"), (1, "Sam", "https://i.pravatar.cc/80?img=15", 5, "A genuinely peaceful stay. We spent every evening by the fire and would return in a heartbeat.", "2026-04-04"), (2, "Nora", "https://i.pravatar.cc/80?img=25", 5, "Beautiful villa, total privacy, and the sunset from the pool was unforgettable.", "2026-03-18")])
-        database.execute("INSERT INTO bookings(listing_id,guest_id,check_in,check_out,guests,nights,total,status) VALUES (1,1,'2026-08-10','2026-08-14',2,4,837,'confirmed')")
+        database.execute(
+            """INSERT INTO bookings(
+                booking_uuid,listing_id,guest_id,check_in,check_out,guests,nights,
+                price_per_night,cleaning_fee_snapshot,service_fee_snapshot,
+                total_price,total,status
+            ) VALUES (?,1,1,'2026-08-10','2026-08-14',2,4,185,55,42,837,837,'confirmed')""",
+            (str(uuid4()),),
+        )
         database.execute("INSERT INTO favorites VALUES (1, 3)")
         _seed_discovery_homes(database)
+        _seed_reviews(database)
+        _seed_completed_trip(database)

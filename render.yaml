@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: roamly-api
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.11
+      - key: ROAMLY_DATABASE_PATH
+        value: /var/data/stays.db
+      - key: ROAMLY_CORS_ORIGINS
+        sync: false
+      - key: AUTH_OTP_SECRET
+        generateValue: true
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USERNAME
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM_EMAIL
+        sync: false
+      - key: SMTP_USE_TLS
+        value: "true"
+      - key: SMTP_USE_SSL
+        value: "false"
+    disk:
+      name: roamly-sqlite
+      mountPath: /var/data
+      sizeGB: 1

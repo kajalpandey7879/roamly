@@ -1,17 +1,9 @@
 'use client';
 
-import {
-  ChevronLeft,
-  List,
-  Map,
-  Maximize2,
-  Minimize2,
-  SlidersHorizontal,
-  Tag,
-} from 'lucide-react';
+import { ChevronLeft, List, Map, Maximize2, Minimize2, SlidersHorizontal, Tag } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import FilterModal from '@/features/explore/components/FilterModal';
@@ -39,6 +31,8 @@ const QUICK_FILTERS = [
 
 export default function CollectionPage() {
   const { slug } = useParams<{ slug: string }>();
+  const routeSearchParams = useSearchParams();
+  const routeQuery = routeSearchParams.toString();
   const collection = getCollection(slug);
   const [listings, setListings] = useState<Listing[]>([]);
   const [total, setTotal] = useState(0);
@@ -51,10 +45,13 @@ export default function CollectionPage() {
   const [imagesRefreshing, setImagesRefreshing] = useState(false);
   const [imageVersion, setImageVersion] = useState(0);
   const imageRefreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mapSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setSearchQuery(collection?.query ?? '');
-  }, [collection]);
+    const params = new URLSearchParams(collection?.query ?? '');
+    new URLSearchParams(routeQuery).forEach((value, key) => params.set(key, value));
+    setSearchQuery(params.toString());
+  }, [collection, routeQuery]);
 
   useEffect(() => {
     if (!collection) return;
@@ -71,6 +68,7 @@ export default function CollectionPage() {
   useEffect(
     () => () => {
       if (imageRefreshTimer.current) clearTimeout(imageRefreshTimer.current);
+      if (mapSearchTimer.current) clearTimeout(mapSearchTimer.current);
     },
     [],
   );
@@ -92,6 +90,21 @@ export default function CollectionPage() {
     beginImageRefresh();
     finishImageRefresh();
   }, [beginImageRefresh, finishImageRefresh]);
+
+  const handleMapBoundsChange = useCallback(
+    (bounds: { north: number; south: number; east: number; west: number }) => {
+      if (mapSearchTimer.current) clearTimeout(mapSearchTimer.current);
+      mapSearchTimer.current = setTimeout(() => {
+        setSearchQuery((current) => {
+          const params = new URLSearchParams(current);
+          Object.entries(bounds).forEach(([key, value]) => params.set(key, value.toFixed(5)));
+          params.delete('page');
+          return params.toString();
+        });
+      }, 450);
+    },
+    [],
+  );
 
   function toggleQuickFilter(key: string, value: string) {
     const params = new URLSearchParams(searchQuery);
@@ -126,9 +139,7 @@ export default function CollectionPage() {
     );
 
   return (
-    <main
-      className={`collection-page mobile-${mobileView}${mapExpanded ? ' map-expanded' : ''}`}
-    >
+    <main className={`collection-page mobile-${mobileView}${mapExpanded ? ' map-expanded' : ''}`}>
       <nav className="collection-quick-filters" aria-label="Quick filters">
         <button className="all-filters-button" onClick={() => setFiltersOpen(true)}>
           <SlidersHorizontal size={16} /> Filters
@@ -172,7 +183,9 @@ export default function CollectionPage() {
             >
               {listings.map((listing) => (
                 <div
-                  className={selectedId === listing.id ? 'map-result-card selected' : 'map-result-card'}
+                  className={
+                    selectedId === listing.id ? 'map-result-card selected' : 'map-result-card'
+                  }
                   key={listing.id}
                   onMouseEnter={() => setSelectedId(listing.id)}
                   onMouseLeave={() => setSelectedId(null)}
@@ -180,8 +193,8 @@ export default function CollectionPage() {
                   <ListingCard key={`${listing.id}-${imageVersion}`} listing={listing} />
                   <p className="result-room-summary">
                     {listing.bedrooms} bedroom{listing.bedrooms === 1 ? '' : 's'} &middot;{' '}
-                    {listing.beds} bed{listing.beds === 1 ? '' : 's'} &middot; {listing.baths}{' '}
-                    bath{listing.baths === 1 ? '' : 's'}
+                    {listing.beds} bed{listing.beds === 1 ? '' : 's'} &middot; {listing.baths} bath
+                    {listing.baths === 1 ? '' : 's'}
                   </p>
                 </div>
               ))}
@@ -213,6 +226,7 @@ export default function CollectionPage() {
             onResize={handleMapResize}
             onInteractionStart={beginImageRefresh}
             onInteractionEnd={finishImageRefresh}
+            onBoundsChange={handleMapBoundsChange}
           />
         </aside>
       </div>

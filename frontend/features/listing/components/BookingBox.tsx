@@ -45,96 +45,107 @@ export default function BookingBox({
   return (
     <div className="booking-card-column">
       <aside className="booking-box">
-      <div className="booking-price">
-        <span>
-          <strong>${nights ? total : listing.price}</strong>{' '}
-          {nights ? `for ${nights} night${nights === 1 ? '' : 's'}` : 'night'}
-        </span>
-        <span>
-          <Star size={14} fill="currentColor" /> {listing.rating} &middot;{' '}
-          <u>{listing.review_count} reviews</u>
-        </span>
-      </div>
-      <div className="date-grid">
-        <label>
-          CHECK-IN
-          <input
-            type="date"
-            min={format(new Date(), 'yyyy-MM-dd')}
-            value={checkIn}
-            onChange={(event) => {
-              const value = event.target.value;
-              onRangeChange({
-                from: value ? parseISO(value) : undefined,
-                to: checkOut && value < checkOut ? range?.to : undefined,
-              });
-            }}
-          />
-        </label>
-        <label>
-          CHECKOUT
-          <input
-            type="date"
-            min={minimumCheckout}
-            value={checkOut}
-            onChange={(event) =>
-              onRangeChange({
-                from: range?.from,
-                to: event.target.value ? parseISO(event.target.value) : undefined,
-              })
-            }
-          />
-        </label>
-        <div className="guest-select">
+        <div className="booking-price">
           <span>
-            <b>GUESTS</b>
-            <small>
-              {guests} guest{guests !== 1 ? 's' : ''}
-            </small>
+            <strong>${nights ? total : listing.price}</strong>{' '}
+            {nights ? `for ${nights} night${nights === 1 ? '' : 's'}` : 'night'}
           </span>
-          <div>
-            <button title="Remove guest" onClick={() => setGuests(Math.max(1, guests - 1))}>
-              <Minus size={15} />
-            </button>
-            <button
-              title="Add guest"
-              onClick={() => setGuests(Math.min(listing.max_guests, guests + 1))}
-            >
-              <Plus size={15} />
-            </button>
+          <span>
+            <Star size={14} fill="currentColor" /> {listing.rating} &middot;{' '}
+            <u>{listing.review_count} reviews</u>
+          </span>
+        </div>
+        <div className="date-grid">
+          <label>
+            CHECK-IN
+            <input
+              type="date"
+              min={format(new Date(), 'yyyy-MM-dd')}
+              value={checkIn}
+              onChange={(event) => {
+                const value = event.target.value;
+                onRangeChange({
+                  from: value ? parseISO(value) : undefined,
+                  to: checkOut && value < checkOut ? range?.to : undefined,
+                });
+              }}
+            />
+          </label>
+          <label>
+            CHECKOUT
+            <input
+              type="date"
+              min={minimumCheckout}
+              value={checkOut}
+              onChange={(event) =>
+                onRangeChange({
+                  from: range?.from,
+                  to: event.target.value ? parseISO(event.target.value) : undefined,
+                })
+              }
+            />
+          </label>
+          <div className="guest-select">
+            <span>
+              <b>GUESTS</b>
+              <small>
+                {guests} guest{guests !== 1 ? 's' : ''}
+              </small>
+            </span>
+            <div>
+              <button title="Remove guest" onClick={() => setGuests(Math.max(1, guests - 1))}>
+                <Minus size={15} />
+              </button>
+              <button
+                title="Add guest"
+                onClick={() => setGuests(Math.min(listing.max_guests, guests + 1))}
+              >
+                <Plus size={15} />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <button className="primary" onClick={reserve}>
-        Reserve
-      </button>
-      <p className="no-charge">You won&apos;t be charged yet</p>
-      {nights > 0 && (
-        <div className="breakdown">
-          <p>
-            <u>
-              ${listing.price} x {nights} nights
-            </u>
-            <span>${subtotal}</span>
-          </p>
-          <p>
-            <u>Cleaning fee</u>
-            <span>${listing.cleaning_fee}</span>
-          </p>
-          <p>
-            <u>Roamly service fee</u>
-            <span>${listing.service_fee}</span>
-          </p>
-          <div>
-            <b>Total before taxes</b>
-            <b>${total}</b>
+        <button className="primary" onClick={reserve}>
+          Reserve
+        </button>
+        <p className="no-charge">You won&apos;t be charged yet</p>
+        {nights > 0 && (
+          <div className="breakdown">
+            <p>
+              <u>
+                ${listing.price} x {nights} nights
+              </u>
+              <span>${subtotal}</span>
+            </p>
+            <p>
+              <u>Cleaning fee</u>
+              <span>${listing.cleaning_fee}</span>
+            </p>
+            <p>
+              <u>Roamly service fee</u>
+              <span>${listing.service_fee}</span>
+            </p>
+            <div>
+              <b>Total before taxes</b>
+              <b>${total}</b>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </aside>
       <button className="booking-report" onClick={() => toast.success('Listing report opened')}>
         <Flag size={14} /> Report this listing
       </button>
+      <div className="mobile-booking-dock">
+        <span>
+          <b>${listing.price}</b> night
+          <small>
+            {nights
+              ? `${format(range!.from!, 'MMM d')} - ${format(range!.to!, 'MMM d')}`
+              : 'Add dates for prices'}
+          </small>
+        </span>
+        <button onClick={reserve}>Reserve</button>
+      </div>
     </div>
   );
 }

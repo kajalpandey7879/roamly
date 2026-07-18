@@ -4,8 +4,8 @@ export default function ListingGrid({ items }: { items: Listing[] }) {
   if (!items.length)
     return (
       <div className="empty">
-        <h2>No stays found</h2>
-        <p>Try changing your destination or filters.</p>
+        <h2>No results found</h2>
+        <p>Try changing your destination, dates, or filters.</p>
       </div>
     );
   return (

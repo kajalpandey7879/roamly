@@ -24,6 +24,7 @@ const AMENITIES = [
 ];
 const PRICE_MIN = 50;
 const PRICE_MAX = 400;
+const PRICE_DISTRIBUTION = [12, 18, 25, 38, 48, 62, 76, 88, 96, 82, 70, 60, 52, 43, 35, 29, 24, 19, 14, 10];
 
 interface FilterModalProps {
   query: string;
@@ -100,11 +101,17 @@ export default function FilterModal({ query, onApply, onClose }: FilterModalProp
             <h3>Price range</h3>
             <p>Nightly prices before fees and taxes</p>
             <div className="price-histogram" aria-hidden="true">
-              {[12, 18, 25, 38, 48, 62, 76, 88, 96, 82, 70, 60, 52, 43, 35, 29, 24, 19, 14, 10].map(
-                (height, index) => (
-                  <i key={index} style={{ height: `${height}%` }} />
-                ),
-              )}
+              {PRICE_DISTRIBUTION.map((height, index) => {
+                const price =
+                  PRICE_MIN + (index / (PRICE_DISTRIBUTION.length - 1)) * (PRICE_MAX - PRICE_MIN);
+                return (
+                  <i
+                    key={index}
+                    className={price >= minPrice && price <= maxPrice ? 'active' : ''}
+                    style={{ height: `${height}%` }}
+                  />
+                );
+              })}
             </div>
             <div className="dual-range">
               <input

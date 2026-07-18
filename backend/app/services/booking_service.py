@@ -1,4 +1,5 @@
 from datetime import date
+from uuid import uuid4
 
 from fastapi import HTTPException
 
@@ -21,8 +22,28 @@ class BookingService:
             if booking_repository.dates_overlap(database, payload.listing_id, payload.check_in.isoformat(), payload.check_out.isoformat()):
                 raise HTTPException(status_code=409, detail="Those dates are no longer available")
             total = round(listing["price"] * nights + listing["cleaning_fee"] + listing["service_fee"], 2)
-            booking_id = booking_repository.create(database, listing_id=payload.listing_id, guest_id=payload.guest_id, check_in=payload.check_in.isoformat(), check_out=payload.check_out.isoformat(), guests=payload.guests, nights=nights, total=total)
-        return {"id": booking_id, "status": "confirmed", "total": total, "nights": nights}
+            booking_uuid = str(uuid4())
+            booking_id = booking_repository.create(
+                database,
+                booking_uuid=booking_uuid,
+                listing_id=payload.listing_id,
+                guest_id=payload.guest_id,
+                check_in=payload.check_in.isoformat(),
+                check_out=payload.check_out.isoformat(),
+                guests=payload.guests,
+                nights=nights,
+                price_per_night=listing["price"],
+                cleaning_fee=listing["cleaning_fee"],
+                service_fee=listing["service_fee"],
+                total=total,
+            )
+        return {
+            "id": booking_id,
+            "booking_uuid": booking_uuid,
+            "status": "confirmed",
+            "total": total,
+            "nights": nights,
+        }
 
     def trips(self, guest_id: int) -> list[dict]:
         with connection() as database:

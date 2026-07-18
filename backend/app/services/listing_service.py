@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import HTTPException
 
 from backend.app.db import connection
@@ -13,6 +15,13 @@ class ListingService:
             raise HTTPException(status_code=422, detail="Both check-in and checkout dates are required")
         if filters.check_in and filters.check_out and filters.check_out <= filters.check_in:
             raise HTTPException(status_code=422, detail="Checkout must be at least one night after check-in")
+        if filters.check_in and filters.check_in < date.today():
+            raise HTTPException(status_code=422, detail="Check-in cannot be in the past")
+        bounds = (filters.north, filters.south, filters.east, filters.west)
+        if any(value is not None for value in bounds) and not all(value is not None for value in bounds):
+            raise HTTPException(status_code=422, detail="All map bounds are required")
+        if filters.north is not None and filters.south is not None and filters.north <= filters.south:
+            raise HTTPException(status_code=422, detail="North map bound must exceed south")
         with connection() as database:
             items, total = listing_repository.search(database, filters, user_id)
         pages = max(1, (total + filters.page_size - 1) // filters.page_size)

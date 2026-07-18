@@ -41,30 +41,40 @@ export interface Listing {
   images: string[];
   latitude: number;
   longitude: number;
+  is_active?: number;
   is_favorite: boolean;
   host?: Host;
   reviews?: Review[];
   unavailable_dates?: UnavailablePeriod[];
   booking_count?: number;
+  host_name?: string;
+  host_is_superhost?: number;
 }
 
 export interface Trip {
   id: number;
+  booking_uuid: string;
   listing_id: number;
   check_in: string;
   check_out: string;
   guests: number;
   nights: number;
   total: number;
+  total_price?: number;
+  price_per_night?: number;
+  cleaning_fee_snapshot?: number;
+  service_fee_snapshot?: number;
   status: string;
   title: string;
   city: string;
   country: string;
   image: string;
+  review_id?: number | null;
 }
 
 export interface HostBooking {
   id: number;
+  booking_uuid: string;
   listing_id: number;
   guest_id: number;
   title: string;
@@ -74,6 +84,8 @@ export interface HostBooking {
   guests: number;
   nights: number;
   total: number;
+  total_price?: number;
+  price_per_night?: number;
   status: string;
 }
 

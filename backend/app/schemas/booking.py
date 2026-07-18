@@ -1,4 +1,5 @@
 from datetime import date
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -13,6 +14,7 @@ class BookingCreate(BaseModel):
 
 class BookingResult(BaseModel):
     id: int
+    booking_uuid: UUID
     status: str
     total: float
     nights: int

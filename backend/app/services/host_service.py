@@ -16,8 +16,10 @@ class HostService:
 
     def create(self, host_id: int, payload: ListingCreate) -> dict:
         with transaction() as database:
+            if not host_repository.promote_to_host(database, host_id):
+                raise HTTPException(status_code=404, detail="User not found")
             listing_id = host_repository.create(database, host_id, payload.model_dump())
-        return {"id": listing_id}
+        return {"id": listing_id, "role": "host"}
 
     def update(self, listing_id: int, host_id: int, payload: ListingCreate) -> dict:
         with transaction() as database:

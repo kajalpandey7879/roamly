@@ -1,5 +1,4 @@
 import sqlite3
-import os
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -8,7 +7,8 @@ from backend.app.core.config import settings
 
 
 def create_connection() -> sqlite3.Connection:
-    database_path = Path(os.getenv("ROAMLY_DATABASE_PATH", settings.database_path))
+    database_path = Path(settings.database_path)
+    database_path.parent.mkdir(parents=True, exist_ok=True)
     database = sqlite3.connect(database_path, check_same_thread=False)
     database.row_factory = sqlite3.Row
     database.execute("PRAGMA foreign_keys = ON")

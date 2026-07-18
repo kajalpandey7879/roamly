@@ -19,6 +19,11 @@ class ListingFilters:
     guests: int = 1
     check_in: date | None = None
     check_out: date | None = None
+    flexible_ranges: tuple[tuple[date, date], ...] = ()
+    north: float | None = None
+    south: float | None = None
+    east: float | None = None
+    west: float | None = None
     page: int = 1
     page_size: int = 8
 

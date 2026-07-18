@@ -1,11 +1,11 @@
 'use client';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, Star } from 'lucide-react';
 import { Listing } from '@/shared/types/domain';
 import { wishlistApi } from '@/features/wishlist/api';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import FallbackImage from '@/shared/ui/FallbackImage';
 export default function ListingCard({ listing }: { listing: Listing }) {
   const [fav, setFav] = useState(listing.is_favorite);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -27,12 +27,13 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       rel="noopener noreferrer"
     >
       <div className={`card-photo${imageLoaded ? ' image-loaded' : ''}`}>
-        <Image
+        <FallbackImage
           src={listing.images[0]}
           alt={listing.title}
           fill
           sizes="(max-width: 760px) 100vw, 25vw"
           onLoad={() => setImageLoaded(true)}
+          onError={() => setImageLoaded(true)}
         />
         <button
           onClick={toggle}
@@ -41,7 +42,9 @@ export default function ListingCard({ listing }: { listing: Listing }) {
         >
           <Heart size={22} fill={fav ? 'currentColor' : 'rgba(0,0,0,.35)'} />
         </button>
-        <span className="category-tag">{listing.category}</span>
+        <span className="category-tag">
+          {listing.host_is_superhost ? 'Superhost' : listing.category}
+        </span>
       </div>
       <div className="card-head">
         <strong>
