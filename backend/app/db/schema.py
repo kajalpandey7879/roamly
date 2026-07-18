@@ -1,0 +1,39 @@
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY, name TEXT NOT NULL, avatar TEXT NOT NULL,
+  role TEXT NOT NULL CHECK(role IN ('guest', 'host')),
+  joined_year INTEGER NOT NULL, is_superhost INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS listings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  host_id INTEGER NOT NULL REFERENCES users(id), title TEXT NOT NULL,
+  description TEXT NOT NULL, city TEXT NOT NULL, country TEXT NOT NULL,
+  property_type TEXT NOT NULL, category TEXT NOT NULL,
+  price REAL NOT NULL CHECK(price > 0), cleaning_fee REAL NOT NULL DEFAULT 45,
+  service_fee REAL NOT NULL DEFAULT 35, max_guests INTEGER NOT NULL CHECK(max_guests > 0),
+  bedrooms INTEGER NOT NULL, beds INTEGER NOT NULL, baths REAL NOT NULL,
+  rating REAL NOT NULL DEFAULT 5, review_count INTEGER NOT NULL DEFAULT 0,
+  amenities TEXT NOT NULL, images TEXT NOT NULL, latitude REAL NOT NULL,
+  longitude REAL NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS bookings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  guest_id INTEGER NOT NULL REFERENCES users(id), check_in TEXT NOT NULL,
+  check_out TEXT NOT NULL, guests INTEGER NOT NULL, nights INTEGER NOT NULL,
+  total REAL NOT NULL, status TEXT NOT NULL DEFAULT 'confirmed',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS favorites (
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  PRIMARY KEY(user_id, listing_id)
+);
+CREATE TABLE IF NOT EXISTS reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  listing_id INTEGER NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  user_name TEXT NOT NULL, avatar TEXT NOT NULL, rating INTEGER NOT NULL,
+  body TEXT NOT NULL, created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_bookings_dates ON bookings(listing_id, check_in, check_out);
+"""
