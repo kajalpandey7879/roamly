@@ -5911,3 +5911,118 @@ body:has(.checkout-loading),
   color: #a7aaa5;
   background: #272a27;
 }
+
+/* Search and account overlays follow the selected theme. */
+[data-theme='light'] .destination-popover,
+[data-theme='light'] .date-popover,
+[data-theme='light'] .guest-popover,
+[data-theme='light'] .account-menu {
+  color: #222;
+  background: #fff;
+  border-color: #dedfdb;
+  box-shadow: 0 18px 48px #00000024;
+}
+[data-theme='light'] .destination-popover > div > button {
+  color: #222;
+}
+[data-theme='light'] .destination-popover > div > button:hover,
+[data-theme='light'] .account-menu > a:hover,
+[data-theme='light'] .account-menu > button:hover,
+[data-theme='light'] .theme-menu-item {
+  background: #f5f5f2;
+}
+[data-theme='light'] .destination-popover button small,
+[data-theme='light'] .account-menu-identity small,
+[data-theme='light'] .menu-host-action small,
+[data-theme='light'] .guest-row > span small {
+  color: #6e716f;
+}
+[data-theme='light'] .account-menu hr,
+[data-theme='light'] .date-popover > header,
+[data-theme='light'] .date-popover > footer,
+[data-theme='light'] .guest-row {
+  border-color: #dedfdb;
+}
+[data-theme='light'] .search-mode-tabs {
+  background: #f0f0ed;
+}
+[data-theme='light'] .search-mode-tabs button {
+  color: #5f625e;
+}
+[data-theme='light'] .search-mode-tabs button.active {
+  color: #222;
+  background: #fff;
+  border-color: #c9cbc7;
+}
+[data-theme='light'] .date-popover .rdp-root {
+  --rdp-accent-color: #222;
+  --rdp-accent-background-color: #ededeb;
+  color: #222;
+}
+[data-theme='light'] .date-popover .rdp-disabled {
+  color: #b4b6b2;
+}
+[data-theme='light'] .date-flexibility button,
+[data-theme='light'] .stay-length-options button,
+[data-theme='light'] .flexible-months button {
+  color: #222;
+  background: #fff;
+  border-color: #bfc1bd;
+}
+[data-theme='light'] .date-flexibility button:hover:not(:disabled),
+[data-theme='light'] .date-flexibility button.active,
+[data-theme='light'] .stay-length-options button:hover,
+[data-theme='light'] .stay-length-options button.active,
+[data-theme='light'] .flexible-months button:hover,
+[data-theme='light'] .flexible-months button.active {
+  color: #222;
+  background: #f5f5f2;
+  border-color: #222;
+}
+[data-theme='light'] .guest-row > span u {
+  color: #383b38;
+}
+[data-theme='light'] .guest-stepper button {
+  color: #222;
+  background: #f3f3f0;
+  border-color: #d5d6d2;
+}
+[data-theme='light'] .compact-header-search .search-shell {
+  color: #222;
+  background: #fff;
+  border-color: #dedfdb;
+  box-shadow: 0 5px 18px #0000001a;
+}
+[data-theme='light'] .compact-header-search .search-shell label,
+[data-theme='light'] .compact-header-search .search-field {
+  border-color: #dedfdb;
+}
+[data-theme='light'] .compact-header-search .search-shell label.active,
+[data-theme='light'] .compact-header-search .search-field.active {
+  background: #f1f1ee;
+}
+[data-theme='light'] .compact-header-search input,
+[data-theme='light'] .compact-header-search .search-field small {
+  color: #656864;
+}
+[data-theme='light'] .collection-search-placeholder {
+  background: #f1f1ee;
+}
+
+[data-theme='dark'] .search-area .search-shell label.active,
+[data-theme='dark'] .search-area .search-field.active,
+[data-theme='dark'] .compact-header-search .search-shell label.active,
+[data-theme='dark'] .compact-header-search .search-field.active {
+  color: #f2f2ef;
+  background: #222522;
+  border: 1px solid #d9dad7;
+  box-shadow: 0 5px 18px #0006;
+}
+[data-theme='dark'] .search-area .search-shell label.active input,
+[data-theme='dark'] .search-area .search-field.active small {
+  color: #f2f2ef;
+}
+[data-theme='dark'] .search-area .search-shell label.active input::placeholder {
+  color: #aeb0ac;
+  opacity: 1;
+}
