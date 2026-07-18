@@ -2449,29 +2449,29 @@ body:has(.listing-detail-shell) .site-footer a {
   background: #151716;
 }
 .listing-detail {
-  width: min(1180px, 90%);
+  width: min(1120px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 34px 0 72px;
+  padding: 26px 0 72px;
 }
 .listing-title-row {
-  min-height: 96px;
+  min-height: 82px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 30px;
 }
 .detail-back-link {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
 }
 .listing-title-row h1 {
-  margin: 0 0 9px;
-  font-size: 29px;
+  margin: 0 0 8px;
+  font-size: 25px;
   line-height: 1.2;
 }
 .listing-detail .detail-meta {
@@ -2502,18 +2502,20 @@ body:has(.listing-detail-shell) .site-footer a {
 }
 
 .listing-photo-gallery {
-  height: 500px;
-  margin-top: 25px;
+  height: 460px;
+  margin-top: 20px;
   position: relative;
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   gap: 6px;
   overflow: hidden;
-  border-radius: 7px;
+  border-radius: 8px;
   background: #242724;
 }
-.listing-photo-gallery > a:not(.show-all-photos) {
+.listing-photo-gallery > button:not(.show-all-photos) {
+  min-width: 0;
+  padding: 0;
   position: relative;
   overflow: hidden;
 }
@@ -2521,7 +2523,7 @@ body:has(.listing-detail-shell) .site-footer a {
   object-fit: cover;
   transition: transform 0.3s ease, filter 0.3s ease;
 }
-.listing-photo-gallery a:hover img {
+.listing-photo-gallery button:hover img {
   transform: scale(1.02);
   filter: brightness(0.9);
 }
@@ -2543,20 +2545,20 @@ body:has(.listing-detail-shell) .site-footer a {
 }
 
 .listing-main-layout {
-  max-width: 1050px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 350px;
-  gap: 70px;
+  grid-template-columns: minmax(0, 1fr) 370px;
+  gap: 86px;
   align-items: flex-start;
 }
 .listing-content > section {
-  padding: 34px 0;
+  padding: 32px 0;
   border-bottom: 1px solid var(--line);
 }
 .listing-content h2 {
   margin: 0 0 18px;
-  font-size: 21px;
+  font-size: 20px;
 }
 .listing-host-summary {
   display: flex;
@@ -2643,9 +2645,11 @@ body:has(.listing-detail-shell) .site-footer a {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
-.sleep-section article > a {
+.sleep-section article > button {
+  width: 100%;
   height: 190px;
   margin-bottom: 11px;
+  padding: 0;
   position: relative;
   display: block;
   overflow: hidden;
@@ -2679,7 +2683,7 @@ body:has(.listing-detail-shell) .site-footer a {
 }
 
 .detail-calendar-section > header {
-  margin-bottom: 18px;
+  margin-bottom: 24px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -2693,30 +2697,98 @@ body:has(.listing-detail-shell) .site-footer a {
   color: var(--muted);
   font-size: 12px;
 }
-.detail-calendar-section header button {
-  color: #d4d5d1;
-  font-size: 12px;
-  text-decoration: underline;
-}
 .detail-calendar-section .rdp-root {
   --rdp-accent-color: #ef4962;
   --rdp-accent-background-color: #ef496222;
   margin: 0;
+  position: relative;
   color: var(--ink);
 }
 .detail-calendar-section .rdp-months {
-  justify-content: space-between;
-  gap: 25px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 34px;
 }
 .detail-calendar-section .rdp-month {
   min-width: 0;
 }
+.detail-calendar-section .rdp-month_caption {
+  height: 40px;
+  justify-content: center;
+}
+.detail-calendar-section .rdp-caption_label {
+  font-size: 14px;
+  font-weight: 700;
+}
+.detail-calendar-section .rdp-month_grid {
+  width: 100%;
+  table-layout: fixed;
+}
+.detail-calendar-section .rdp-weekday {
+  height: 30px;
+  color: #9a9d98;
+  font-size: 10px;
+  font-weight: 600;
+}
+.detail-calendar-section .rdp-day {
+  height: 41px;
+}
 .detail-calendar-section .rdp-day_button {
+  width: 38px;
+  height: 38px;
+  margin: auto;
+  border-radius: 50%;
   color: inherit;
+  font-size: 12px;
+}
+.detail-calendar-section .rdp-today:not(.rdp-selected) .rdp-day_button {
+  border: 1px solid #696c67;
+}
+.detail-calendar-section .rdp-selected .rdp-day_button {
+  color: #151716;
+  background: #f3f3f0;
+  border-color: #f3f3f0;
+}
+.detail-calendar-section .rdp-range_middle .rdp-day_button {
+  color: #f3f3f0;
+  background: #303330;
+  border-radius: 0;
 }
 .detail-calendar-section .rdp-disabled {
   color: #555954;
   text-decoration: line-through;
+}
+.detail-calendar-section .rdp-nav {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+}
+.detail-calendar-section .rdp-button_previous,
+.detail-calendar-section .rdp-button_next {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.detail-calendar-section .rdp-button_previous:hover,
+.detail-calendar-section .rdp-button_next:hover {
+  background: #242724;
+}
+.detail-calendar-section > footer {
+  min-height: 42px;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.detail-calendar-section > footer button {
+  color: #f2f2ef;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 .detail-reviews h2 {
@@ -2755,18 +2827,39 @@ body:has(.listing-detail-shell) .site-footer a {
   line-height: 1.6;
 }
 
+.listing-wide-content > section {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--line);
+}
+.listing-wide-content h2 {
+  margin: 0 0 18px;
+  font-size: 21px;
+}
 .detail-location > p {
   margin: -10px 0 18px;
   color: var(--muted);
   font-size: 13px;
 }
-.detail-location-map,
+.detail-map-frame,
 .detail-map-loading {
   width: 100%;
-  height: 390px;
-  border-radius: 7px;
+  height: 470px;
+  position: relative;
+  border: 1px solid #3d403d;
+  border-radius: 8px;
   overflow: hidden;
   background: #242724;
+}
+.detail-location-map {
+  width: 100%;
+  height: 100%;
+}
+.detail-map-frame:fullscreen {
+  border: 0;
+  border-radius: 0;
+}
+.detail-map-frame:fullscreen .detail-location-map {
+  height: 100vh;
 }
 .detail-map-loading {
   display: grid;
@@ -2778,13 +2871,47 @@ body:has(.listing-detail-shell) .site-footer a {
   background: transparent;
 }
 .detail-map-marker {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #171918;
+  background: #fff;
+  border: 7px solid #202320;
+  box-shadow: 0 4px 18px #0008;
+}
+.detail-map-locate,
+.detail-map-expand {
   width: 42px;
   height: 42px;
-  display: block;
-  border: 11px solid #202320;
+  position: absolute;
+  z-index: 500;
+  display: grid;
+  place-items: center;
+  border: 1px solid #d8dad6;
   border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 3px 12px #0008;
+  color: #202321;
+  background: #fff;
+  box-shadow: 0 2px 8px #0003;
+}
+.detail-map-locate {
+  top: 16px;
+  left: 16px;
+}
+.detail-map-expand {
+  right: 16px;
+  bottom: 16px;
+}
+.detail-map-frame .leaflet-control-zoom {
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0003;
+}
+.detail-map-frame .leaflet-control-zoom a {
+  color: #202321;
+  background: #fff;
 }
 .detail-location .exact-location-note {
   margin: 13px 0 0;
@@ -2796,14 +2923,15 @@ body:has(.listing-detail-shell) .site-footer a {
 
 .host-profile-layout {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 35px;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 56px;
+  align-items: start;
 }
 .host-profile-card {
-  padding: 25px;
+  padding: 28px;
   text-align: center;
   border: 1px solid #3e413e;
-  border-radius: 7px;
+  border-radius: 8px;
   background: #1d201e;
   box-shadow: 0 7px 22px #0004;
 }
@@ -2870,13 +2998,275 @@ body:has(.listing-detail-shell) .site-footer a {
   font-size: 10px;
 }
 
+/* Listing detail dialogs and full photo gallery */
+.listing-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  padding: 24px;
+  display: grid;
+  place-items: center;
+  background: #000a;
+  backdrop-filter: blur(3px);
+  animation: listing-backdrop-in 160ms ease-out;
+}
+.listing-modal-card {
+  width: min(680px, 100%);
+  max-height: min(760px, calc(100vh - 48px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #f2f2ef;
+  border: 1px solid #4b4e4a;
+  border-radius: 8px;
+  background: #1b1d1c;
+  box-shadow: 0 24px 80px #000a;
+  animation: listing-modal-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.listing-modal-card > header {
+  min-height: 68px;
+  padding: 0 22px;
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  align-items: center;
+  border-bottom: 1px solid #3a3d39;
+}
+.listing-modal-card > header button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+.listing-modal-card > header button:hover {
+  background: #2a2d2a;
+}
+.listing-modal-card > header h2 {
+  margin: 0;
+  text-align: center;
+  font-size: 18px;
+}
+.listing-modal-content {
+  padding: 28px;
+  overflow-y: auto;
+}
+.description-modal-copy h3 {
+  margin: 26px 0 8px;
+  font-size: 16px;
+}
+.description-modal-copy p {
+  margin: 0 0 14px;
+  color: #d1d3cf;
+  font-size: 14px;
+  line-height: 1.75;
+}
+.amenities-modal-list {
+  display: grid;
+}
+.amenities-modal-list article {
+  min-height: 76px;
+  padding: 16px 2px;
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid #383b38;
+}
+.amenities-modal-list article:last-child {
+  border: 0;
+}
+.amenities-modal-list span > * {
+  display: block;
+}
+.amenities-modal-list small {
+  margin-top: 4px;
+  color: #aeb0ac;
+  line-height: 1.4;
+}
+.reviews-modal-list {
+  display: grid;
+  gap: 24px;
+}
+.reviews-modal-score {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 18px;
+}
+.reviews-modal-list > article {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #393c39;
+}
+.reviews-modal-list > article:last-child {
+  border: 0;
+}
+.reviews-modal-list article header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.reviews-modal-list article header img {
+  border-radius: 50%;
+}
+.reviews-modal-list article header span > * {
+  display: block;
+}
+.reviews-modal-list article small {
+  margin-top: 3px;
+  color: #aeb0ac;
+}
+.reviews-modal-list article p {
+  margin: 14px 0 0;
+  color: #d1d3cf;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.photo-gallery-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1250;
+  overflow-y: auto;
+  color: #f2f2ef;
+  background: #171918;
+  animation: listing-backdrop-in 160ms ease-out;
+}
+.photo-gallery-overlay > header {
+  min-height: 76px;
+  padding: 12px max(24px, calc((100% - 1050px) / 2));
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  align-items: center;
+  border-bottom: 1px solid #343734;
+  background: #171918f5;
+  backdrop-filter: blur(10px);
+}
+.photo-gallery-overlay > header button {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+.photo-gallery-overlay > header button:hover {
+  background: #292c29;
+}
+.photo-gallery-overlay > header div {
+  min-width: 0;
+  text-align: center;
+}
+.photo-gallery-overlay > header h2 {
+  margin: 0;
+  overflow: hidden;
+  font-size: 17px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.photo-gallery-overlay > header span {
+  color: #aeb0ac;
+  font-size: 11px;
+}
+.photo-gallery-mosaic {
+  width: min(1000px, calc(100% - 48px));
+  margin: 36px auto 80px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.photo-gallery-mosaic figure {
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #242724;
+}
+.photo-gallery-mosaic figure.featured {
+  grid-column: 1 / -1;
+}
+.photo-gallery-mosaic img {
+  width: 100%;
+  height: 360px;
+  display: block;
+  object-fit: cover;
+}
+.photo-gallery-mosaic .featured img {
+  height: min(68vh, 680px);
+}
+.photo-gallery-mosaic figcaption {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 9px;
+  border-radius: 4px;
+  color: #fff;
+  background: #171918d9;
+  font-size: 11px;
+}
+
+@keyframes listing-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes listing-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .listing-modal-backdrop,
+  .listing-modal-card,
+  .photo-gallery-overlay {
+    animation: none;
+  }
+}
+
+.booking-card-column {
+  margin-top: 32px;
+  position: sticky;
+  top: 104px;
+}
 .listing-detail .booking-box {
-  top: 105px;
-  margin-top: 38px;
+  position: static;
+  top: auto;
+  width: 100%;
+  margin: 0;
+  padding: 24px;
   color: var(--ink);
   background: #1d201e;
   border-color: #454844;
-  box-shadow: 0 10px 30px #0006;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px #0005;
+}
+.listing-detail .booking-price {
+  margin-bottom: 20px;
+  align-items: baseline;
+}
+.listing-detail .booking-price strong {
+  font-size: 21px;
+}
+.listing-detail .date-grid {
+  overflow: hidden;
+  border-radius: 8px;
+}
+.listing-detail .date-grid label {
+  min-height: 62px;
+  padding: 10px 12px;
+}
+.listing-detail .guest-select {
+  min-height: 58px;
+  padding: 9px 12px;
 }
 .listing-detail .date-grid,
 .listing-detail .date-grid label,
@@ -2893,8 +3283,20 @@ body:has(.listing-detail-shell) .site-footer a {
   border-color: #656963;
 }
 .listing-detail .primary {
-  border-radius: 6px;
-  background: #e81755;
+  min-height: 48px;
+  margin-top: 16px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #e61e4d, #d70466);
+  box-shadow: none;
+}
+.booking-report {
+  margin: 18px auto 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b9bbb7;
+  font-size: 12px;
+  text-decoration: underline;
 }
 
 .nearby-homes {
@@ -2961,6 +3363,7 @@ body:has(.listing-detail-shell) .site-footer a {
   }
   .listing-title-row,
   .listing-main-layout,
+  .listing-wide-content,
   .nearby-homes {
     width: calc(100% - 32px);
     margin-left: auto;
@@ -3003,10 +3406,12 @@ body:has(.listing-detail-shell) .site-footer a {
   .listing-main-layout {
     grid-template-columns: 1fr;
   }
-  .listing-detail .booking-box {
-    position: relative;
-    top: 0;
+  .booking-card-column {
     margin: 20px 0 0;
+    position: static;
+  }
+  .listing-detail .booking-box {
+    margin: 0;
   }
   .detail-calendar-section {
     overflow-x: auto;
@@ -3016,6 +3421,10 @@ body:has(.listing-detail-shell) .site-footer a {
   }
   .host-profile-layout {
     grid-template-columns: 1fr;
+  }
+  .detail-map-frame,
+  .detail-map-loading {
+    height: 360px;
   }
   .things-to-know > div {
     grid-template-columns: 1fr;
@@ -3047,7 +3456,7 @@ body:has(.listing-detail-shell) .site-footer a {
     height: 300px;
     display: block;
   }
-  .listing-photo-gallery > a:not(.listing-gallery-0):not(.show-all-photos) {
+  .listing-photo-gallery > button:not(.listing-gallery-0):not(.show-all-photos) {
     display: none;
   }
   .listing-gallery-0 {
@@ -3068,6 +3477,38 @@ body:has(.listing-detail-shell) .site-footer a {
   }
   .listing-content > section {
     padding: 28px 0;
+  }
+  .listing-modal-backdrop {
+    padding: 0;
+    align-items: end;
+  }
+  .listing-modal-card {
+    width: 100%;
+    max-height: 88vh;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 8px 8px 0 0;
+  }
+  .listing-modal-content {
+    padding: 22px 20px 32px;
+  }
+  .photo-gallery-overlay > header {
+    padding: 10px 14px;
+  }
+  .photo-gallery-mosaic {
+    width: calc(100% - 24px);
+    margin-top: 16px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .photo-gallery-mosaic figure.featured {
+    grid-column: auto;
+  }
+  .photo-gallery-mosaic img,
+  .photo-gallery-mosaic .featured img {
+    height: auto;
+    aspect-ratio: 4 / 3;
   }
 }
 

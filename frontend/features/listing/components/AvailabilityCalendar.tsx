@@ -1,6 +1,7 @@
 'use client';
 
 import { addDays, differenceInCalendarDays, format, parseISO, startOfToday } from 'date-fns';
+import { Keyboard } from 'lucide-react';
 import { useState } from 'react';
 import { DayPicker, type DateRange } from 'react-day-picker';
 import 'react-day-picker/style.css';
@@ -10,13 +11,20 @@ import type { UnavailablePeriod } from '@/shared/types/domain';
 export default function AvailabilityCalendar({
   city,
   unavailablePeriods = [],
+  range,
+  onRangeChange,
 }: {
   city: string;
   unavailablePeriods?: UnavailablePeriod[];
+  range?: DateRange;
+  onRangeChange?: (range: DateRange | undefined) => void;
 }) {
-  const [range, setRange] = useState<DateRange>();
+  const [internalRange, setInternalRange] = useState<DateRange>();
+  const selectedRange = range ?? internalRange;
   const nights =
-    range?.from && range.to ? differenceInCalendarDays(range.to, range.from) : 0;
+    selectedRange?.from && selectedRange.to
+      ? differenceInCalendarDays(selectedRange.to, selectedRange.from)
+      : 0;
   const disabled = [
     { before: startOfToday() },
     ...unavailablePeriods.map((period) => ({
@@ -25,33 +33,39 @@ export default function AvailabilityCalendar({
     })),
   ];
 
+  function selectRange(nextRange: DateRange | undefined) {
+    setInternalRange(nextRange);
+    onRangeChange?.(nextRange);
+  }
+
   return (
     <section className="detail-calendar-section">
       <header>
         <div>
           <h2>{nights ? `${nights} night${nights === 1 ? '' : 's'} in ${city}` : `Select dates in ${city}`}</h2>
           <p>
-            {range?.from && range.to
-              ? `${format(range.from, 'MMM d, yyyy')} - ${format(range.to, 'MMM d, yyyy')}`
+            {selectedRange?.from && selectedRange.to
+              ? `${format(selectedRange.from, 'MMM d, yyyy')} - ${format(selectedRange.to, 'MMM d, yyyy')}`
               : 'Add your travel dates for exact pricing'}
           </p>
         </div>
-        {range?.from && (
-          <button onClick={() => setRange(undefined)}>
-            Clear dates
-          </button>
-        )}
       </header>
       <DayPicker
         mode="range"
         min={1}
         numberOfMonths={2}
-        selected={range}
-        onSelect={setRange}
+        selected={selectedRange}
+        onSelect={selectRange}
         disabled={disabled}
         excludeDisabled
         defaultMonth={startOfToday()}
       />
+      <footer>
+        <Keyboard size={19} />
+        {selectedRange?.from && (
+          <button onClick={() => selectRange(undefined)}>Clear dates</button>
+        )}
+      </footer>
     </section>
   );
 }

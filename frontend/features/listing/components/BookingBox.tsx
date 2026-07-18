@@ -1,28 +1,29 @@
 'use client';
 
 import type { Listing } from '@/shared/types/domain';
-import { addDays, differenceInCalendarDays, format } from 'date-fns';
-import { Minus, Plus, Star } from 'lucide-react';
+import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
+import { Flag, Minus, Plus, Star } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import type { DateRange } from 'react-day-picker';
 import toast from 'react-hot-toast';
 
-export default function BookingBox({ listing }: { listing: Listing }) {
+export default function BookingBox({
+  listing,
+  range,
+  onRangeChange,
+}: {
+  listing: Listing;
+  range?: DateRange;
+  onRangeChange: (range: DateRange | undefined) => void;
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [checkIn, setCheckIn] = useState(searchParams.get('check_in') || '');
-  const [checkOut, setCheckOut] = useState(searchParams.get('check_out') || '');
   const [guests, setGuests] = useState(Number(searchParams.get('guests') || 1));
-  const nights = useMemo(
-    () =>
-      checkIn && checkOut
-        ? Math.max(
-            0,
-            differenceInCalendarDays(new Date(`${checkOut}T12:00`), new Date(`${checkIn}T12:00`)),
-          )
-        : 0,
-    [checkIn, checkOut],
-  );
+  const checkIn = range?.from ? format(range.from, 'yyyy-MM-dd') : '';
+  const checkOut = range?.to ? format(range.to, 'yyyy-MM-dd') : '';
+  const nights =
+    range?.from && range.to ? Math.max(0, differenceInCalendarDays(range.to, range.from)) : 0;
   const minimumCheckout = checkIn
     ? format(addDays(new Date(`${checkIn}T12:00`), 1), 'yyyy-MM-dd')
     : format(addDays(new Date(), 1), 'yyyy-MM-dd');
@@ -42,10 +43,12 @@ export default function BookingBox({ listing }: { listing: Listing }) {
   }
 
   return (
-    <aside className="booking-box">
+    <div className="booking-card-column">
+      <aside className="booking-box">
       <div className="booking-price">
         <span>
-          <strong>${listing.price}</strong> night
+          <strong>${nights ? total : listing.price}</strong>{' '}
+          {nights ? `for ${nights} night${nights === 1 ? '' : 's'}` : 'night'}
         </span>
         <span>
           <Star size={14} fill="currentColor" /> {listing.rating} &middot;{' '}
@@ -61,8 +64,10 @@ export default function BookingBox({ listing }: { listing: Listing }) {
             value={checkIn}
             onChange={(event) => {
               const value = event.target.value;
-              setCheckIn(value);
-              if (checkOut && value >= checkOut) setCheckOut('');
+              onRangeChange({
+                from: value ? parseISO(value) : undefined,
+                to: checkOut && value < checkOut ? range?.to : undefined,
+              });
             }}
           />
         </label>
@@ -72,7 +77,12 @@ export default function BookingBox({ listing }: { listing: Listing }) {
             type="date"
             min={minimumCheckout}
             value={checkOut}
-            onChange={(event) => setCheckOut(event.target.value)}
+            onChange={(event) =>
+              onRangeChange({
+                from: range?.from,
+                to: event.target.value ? parseISO(event.target.value) : undefined,
+              })
+            }
           />
         </label>
         <div className="guest-select">
@@ -121,6 +131,10 @@ export default function BookingBox({ listing }: { listing: Listing }) {
           </div>
         </div>
       )}
-    </aside>
+      </aside>
+      <button className="booking-report" onClick={() => toast.success('Listing report opened')}>
+        <Flag size={14} /> Report this listing
+      </button>
+    </div>
   );
 }
